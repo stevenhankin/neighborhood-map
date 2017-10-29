@@ -1,0 +1,20 @@
+/*.glyphicon {*/
+    /*font-size: 1.4em;*/
+
+/*}*/
+a {
+    height: 100%;
+}
+
+#filter-label {
+    top: 0px;
+}
+
+#map {
+    height: 0;
+    overflow: hidden;
+    padding-bottom: 100%;
+    padding-top: 30px;
+    position: relative;
+}
+
