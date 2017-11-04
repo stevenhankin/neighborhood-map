@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Neighborhood Map</title>
-    <script defer type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js'></script>
     <link rel="stylesheet" href='https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/cyborg/bootstrap.min.css'>
     <link rel="stylesheet" href='styles.css'>
+    <script defer type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js'></script>
     <script defer type='text/javascript'
             src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>
     <script defer type='text/javascript'
@@ -31,7 +31,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">Places 2 Visit</a>
+                <a class="navbar-brand" href="#">Castles & Eateries</a>
             </div>
 
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -46,24 +46,26 @@
         <div class="row">
             <div class="col-xs-2">
                 <div class="row input-group">
-                    <input type="text" id="search" class="form-control">
-                    <span id="filter-label" class="input-group-addon glyphicon glyphicon-filter "></span>
+                    <input type="text" data-bind="value: placesSearch" class="form-control">
+                    <a href="#" class="input-group-addon">
+                        <span id="filter-label" class="glyphicon glyphicon-filter "></span>
+                    </a>
                 </div>
+
+
                 <div class="row">
-                    <ul class="list-group">
-                        <li class="list-group-item">Cras justo odio</li>
-                        <li class="list-group-item">Dapibus ac facilisis in</li>
-                        <li class="list-group-item">Morbi leo risus</li>
-                        <li class="list-group-item">Porta ac consectetur ac</li>
-                        <li class="list-group-item">Vestibulum at eros</li>
+                    <ul data-bind="foreach: placesList"  class="list-group">
+                        <li class="list-group-item" data-bind="text: name"></li>
                     </ul>
                 </div>
             </div>
+
             <div class="col-xs-10">
                 <div id="map"></div>
             </div>
+
         </div>
     </div>
-
+</div>
 </body>
 </html>
