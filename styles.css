@@ -1,10 +1,7 @@
-/*.glyphicon {*/
-    /*font-size: 1.4em;*/
 
+/*a {*/
+    /*height: 100%;*/
 /*}*/
-a {
-    height: 100%;
-}
 
 #filter-label {
     top: 0px;
@@ -16,4 +13,8 @@ a {
     padding-bottom: 100%;
     padding-top: 30px;
     position: relative;
+}
+
+.info-place-name {
+    font-weight: bold;
 }
