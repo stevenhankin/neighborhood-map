@@ -1,20 +1,28 @@
 var model = {
 
     /**
-     * Represents a place of interest
+     * Class for a place of interest
      * @param name Displayable name of place (appears in Places List)
      * @param type Determines the marker icon for map
      * @param coord Latitude and Longitude position of place
      * @constructor
      */
-    Place: function (name, type, coord) {
+    place: function (name, type, coord) {
         this.name = name;
         this.type = type;
         this.coord = coord;
     },
 
-    neighborhoodGeo: {/* This is my neighborhood */ lat: 51.1414, lng: 0.5894},
+    /**
+     * This is my neighborhood location
+     */
+    neighborhoodGeo: {lat: 51.1414, lng: 0.5894},
 
+    /**
+     * Photo limit is to reduce load on Flickr API
+     * and keep the number of photos on Carousel
+     * to a reasonable number
+     */
     carousel_photo_limit: 10,
 
     /**
@@ -46,23 +54,24 @@ var model = {
         /**
          * Array of Places used for both the Search and the Map Markers
          */
-        this.places = [new this.Place("Well House", 'home', {lat: 51.138725, lng: 0.591060}),
-            new this.Place("Sissinghurst Castle", 'castle', {lat: 51.115282, lng: 0.582349}),
-            new this.Place("Scotney Castle", 'castle', {lat: 51.092852, lng: 0.408211}),
-            new this.Place("Leeds Castle", 'castle', {lat: 51.248918, lng: 0.630465}),
-            new this.Place("Chapel Down Winery", 'eatery', {lat: 51.040965, lng: 0.699023}),
-            new this.Place("The West House", 'eatery', {lat: 51.115184, lng: 0.642370}),
-            new this.Place("Frasers", 'eatery', {lat: 51.186404, lng: 0.695287}),
-            new this.Place("The Windmill", 'eatery', {lat: 51.261533, lng: 0.626266}),
-            new this.Place("Apicius", 'eatery', {lat: 51.095989, lng: 0.536717}),
-            new this.Place("The Poet", 'eatery', {lat: 51.154057, lng: 0.373423}),
-            new this.Place("Smarden Bell", 'eatery', {lat: 51.155260, lng: 0.672364}),
-            new this.Place("Knoxbridge Inn", 'eatery', {lat: 51.136965, lng: 0.555603}),
-            new this.Place("Bodiam Castle", 'castle', {lat: 51.002210, lng: 0.543565}),
-            new this.Place("Star & Eagle Hotel", 'eatery', {lat: 51.113434, lng: 0.460524}),
-            new this.Place("The Bull", 'eatery', {lat: 51.066421, lng: 0.581696}),
-            new this.Place("White Lion", 'eatery', {lat: 51.067804, lng: 0.686681}),
-            new this.Place("Tickled Trout", 'eatery', {lat: 51.246928, lng: 0.453419})
+        this.places = [
+            new this.place("Well House", 'home', {lat: 51.138725, lng: 0.591060}),
+            new this.place("Sissinghurst Castle", 'castle', {lat: 51.115282, lng: 0.582349}),
+            new this.place("Scotney Castle", 'castle', {lat: 51.092852, lng: 0.408211}),
+            new this.place("Leeds Castle", 'castle', {lat: 51.248918, lng: 0.630465}),
+            new this.place("Chapel Down Winery", 'eatery', {lat: 51.040965, lng: 0.699023}),
+            new this.place("The West House", 'eatery', {lat: 51.115184, lng: 0.642370}),
+            new this.place("Frasers", 'eatery', {lat: 51.186404, lng: 0.695287}),
+            new this.place("The Windmill", 'eatery', {lat: 51.261533, lng: 0.626266}),
+            new this.place("Apicius", 'eatery', {lat: 51.095989, lng: 0.536717}),
+            new this.place("The Poet", 'eatery', {lat: 51.154057, lng: 0.373423}),
+            new this.place("Smarden Bell", 'eatery', {lat: 51.155260, lng: 0.672364}),
+            new this.place("Knoxbridge Inn", 'eatery', {lat: 51.136965, lng: 0.555603}),
+            new this.place("Bodiam Castle", 'castle', {lat: 51.002210, lng: 0.543565}),
+            new this.place("Star & Eagle Hotel", 'eatery', {lat: 51.113434, lng: 0.460524}),
+            new this.place("The Bull", 'eatery', {lat: 51.066421, lng: 0.581696}),
+            new this.place("White Lion", 'eatery', {lat: 51.067804, lng: 0.686681}),
+            new this.place("Tickled Trout", 'eatery', {lat: 51.246928, lng: 0.453419})
         ]
     }
 };
@@ -77,21 +86,20 @@ var gmapViewModel = {
      */
     markerList: [],
 
+
     /**
-     * Google Maps are setup via a callback
-     * Keep everything google-related in a separate
-     * view model to prevent it from breaking other VMs
+     * Animate marker with 2 bounces
+     * This is to get the user's attention, but not annoy or distract
+     *
+     * @param marker - to animate
      */
     bounceMarkerOnce: function (marker) {
-        /*
-         * Do one bounce then make the marker stationary again
-         * This is to get the user's attention, but not annoy or distract
-         */
         marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function () {
             marker.setAnimation(null);
-        }, 700)
+        }, 1400)
     },
+
 
     /**
      * Bespoke Marker icons
@@ -114,9 +122,9 @@ var gmapViewModel = {
      *
      * @param photo - First photo element from Flickr query
      * @returns {string} - HTML Text representing the Bootstrap Photo Carousel
+     *                     or apology if no photos available
      */
-    create_photo_carousel: function (photo) {
-        console.dir(photo.length);
+    createPhotoCarousel: function (photo) {
 
         if (photo.length === 0) {
             return '<p>This place currently has no photos on Flickr.  Maybe you\'d like to upload some?</p>';
@@ -135,11 +143,13 @@ var gmapViewModel = {
                 + server + "/"
                 + id + "_" + secret + ".jpg";
 
-            carousel += '<div class="item ' + (i === 0 ? 'active' : '') + ' "><img  class="info-picture" height="200px" src=' + url + ' ></div>';
+            carousel += '<div class="item ' + (i === 0 ? 'active' : '') + ' ">' +
+                '<img  class="info-picture" height="200px" src=' + url + ' ></div>';
             photo = photo.next();
             i++;
         }
-        carousel += '</div><a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">\n' +
+        carousel += '</div><a class="left carousel-control" href="#carousel-example-generic" role="button"' +
+            ' data-slide="prev">\n' +
             '    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>\n' +
             '    <span class="sr-only">Previous</span>\n' +
             '  </a>\n' +
@@ -155,12 +165,11 @@ var gmapViewModel = {
      * Create an InfoWindow for the specified Marker
      * (with supplied place details)
      * @param marker - Marker for infowindow
-     * @param place - Place referenced by marker
+     * @param place - place referenced by marker
      */
     createInfoWindow: function (marker, place) {
 
         var self = this;
-
         self.infowindow.open(self.map, marker);
         /*
         Initial message to user whilst an Ajax attempt
@@ -175,7 +184,7 @@ var gmapViewModel = {
         model.lastClicked = place.id;
 
         var flickrUrl = "https://api.flickr.com/services/rest/";
-        var jqxhr = $.ajax(
+        $.ajax(
             flickrUrl,
             {
                 data: {
@@ -189,34 +198,33 @@ var gmapViewModel = {
                     has_geo: 1,
                     per_page: model.carousel_photo_limit
                 },
-                timeout: 2000 /* 2 seconds to retrieve or give up */
+                timeout: 2000 /* 2 seconds to retrieve or give up - don't want to keep user waiting! */
             })
             .done(function (xml) {
                 /*
                 Locate the first photo.  Will iterate through
                 several to generate a carousel of pictures
+                if possible
                  */
                 var photo = $(xml).find("photo");
-
-                var carousel = self.create_photo_carousel(photo);
-
-                var content = '<div id="info-window"><div class="info-place-name">' + place.name + '</div>' + carousel + "</div>";
+                var carousel = self.createPhotoCarousel(photo);
+                var content = '<div id="info-window"><div class="info-place-name">' + place.name + '</div>'
+                    + carousel + "</div>";
                 self.infowindow.setContent(content);
-                self.infowindow.open(self.map, marker);
             })
             .fail(function () {
-                self.infowindow.setContent('<div class="info-place-name">' + place.name + '</div>(Sorry, we are unable to retrieve pictures at the moment)');
-                self.infowindow.open(self.map, marker);
+                self.infowindow.setContent('<div class="info-place-name">' + place.name
+                    + '</div>(Sorry, we are unable to retrieve pictures at the moment)');
             });
-
         self.bounceMarkerOnce(marker);
     },
+
 
     /**
      * Create a marker for the specified place
      * with the appropriate icon and call the
      * infowindow setup
-     * @param marker - Used for extending bounds of map
+     * @param place - Used for extending bounds of map
      */
     addMarker: function (place) {
         var self = this;
@@ -247,9 +255,10 @@ var gmapViewModel = {
         return marker
     },
 
+
     /**
      * Create Google Map Markers for supplied places
-     * @param places
+     * @param places - List of places (possibly filtered)
      */
     createMarkers: function (places) {
         var self = this;
@@ -268,7 +277,7 @@ var gmapViewModel = {
          */
         if (places.length > 0) {
             var bounds = new google.maps.LatLngBounds();
-            places.forEach(function (place, i) {
+            places.forEach(function (place) {
                 bounds.extend(place.coord);
             });
             self.map.fitBounds(bounds);
@@ -281,16 +290,18 @@ var gmapViewModel = {
          */
         places.forEach(function (place, i) {
             setTimeout(function () {
-                var marker = self.addMarker(place);
+                self.addMarker(place);
             }, i * 75);
         });
     },
 
+
+    /**
+     * Called from the Places View Model, when a place is clicked
+     * so that the respective marker is activated
+     * @param id - Array index for marker
+     */
     selectMarker: function (id) {
-        /**
-         * Called from the Places View Model, when a place is clicked
-         * so that the respective marker is activated
-         */
         google.maps.event.trigger(this.markerList[id], 'click');
     },
 
@@ -300,6 +311,14 @@ var gmapViewModel = {
      * map library is ready and is setup in the global scope
      */
     initMap: function () {
+
+        /**
+         * When map is ready, apply bindings to the Places View Model and initialise the model
+         * No Knockout bindings to apply to Map View Model, since Google Map has built-in handling
+         */
+        ko.applyBindings(placeListViewModel);
+        placeListViewModel.init();
+
         this.map = new google.maps.Map(document.getElementById('map'), model.mapConfig);
         this.map.setCenter(model.neighborhoodGeo);
         /**
@@ -332,23 +351,18 @@ var gmapViewModel = {
          * Map is ready so let's create ALL the markers by default..
          */
         this.createMarkers(model.places);
+
     }
 };
 
 
 var placeListViewModel = {
 
-    placesSearch: ko.observable(),
 
+    placesSearch: ko.observable(),
+    
     placesList: ko.observableArray([]),
 
-    showPlaceList: ko.observable(true),
-
-    // toggleMenu: function () {
-    //     this.showPlaceList(this.showPlaceList() ? false : true);
-    //     gmapViewModel.redrawMap();
-    //     // alert (this.showPlaceList)
-    // },
 
     filterPlaces: function () {
         /**
@@ -371,11 +385,12 @@ var placeListViewModel = {
         gmapViewModel.createMarkers(newPlacesList);
     },
 
+
+    /**
+     * Populate the Observable Array of Places
+     * using the default list in the Model
+     */
     populatePlacesList: function () {
-        /**
-         * Populate the Observable Array of Places
-         * using the default list in the Model
-         */
         var self = this;
         model.places.sort(function comp(a, b) {
             if (a.name < b.name) {
@@ -390,15 +405,21 @@ var placeListViewModel = {
         });
     },
 
+
+    /**
+     * Selecting an item on the place List View Model
+     * requires a callout to the Map View Model
+     * to select and animate the respective marker
+     * @param elem - Place DOM element that was clicked
+     */
     listItemClick: function (elem) {
-        /**
-         * Selecting an item on the Place List View Model
-         * requires a callout to the Map View Model
-         * to select and animate the respective marker
-         */
         gmapViewModel.selectMarker(elem.id);
     },
 
+
+    /**
+     * Called when the Map Model View is ready to initialise
+     */
     init: function () {
         model.init();
         this.populatePlacesList();
@@ -408,20 +429,8 @@ var placeListViewModel = {
          * to automatically update the
          * markers and map bounds
          */
-        this.placesSearch.subscribe(function (newText) {
+        this.placesSearch.subscribe(function () {
             self.filterPlaces();
         });
     }
 };
-
-
-/**
- * When document is ready, apply bindings to the Places View Model and initialise the model
- * No Knockout bindings to apply to Map View Model, since Google Map has built-in handling
- */
-$(
-    function () {
-        ko.applyBindings(placeListViewModel);
-        placeListViewModel.init();
-    }()
-);

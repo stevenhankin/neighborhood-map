@@ -9,17 +9,24 @@ location of the marker.
 Open [index.html](index.html) in a browser
 
 # How it works
-When index.html is opened in a browser, 
+1) When index.html is opened in a browser, the Javascript libraries are downloaded (from a CDN, except for the 
+main application which is local) during HTML parsing
+2) The Google Map API is called with a callback to the gmapViewModel, which initialises..
+    1) the placeListViewModel (and applies the Knockout Bindings)
+    2) the Google Map
 
 # Features
+* Responsive design achieved through Bootstrap Grid system
+* Data binding of both Search Text and Places List through Knockout Observables
 * On small devices, the sidebar automatically disappears to allow map to fill all available space
 * Typing in search box automatically filters list of places and map markers, resizing map as required
 * Clicking a place on sidebar automatically selects place on map and opens Infowindow
-* Clicking a marker on the map displays the respective Infowindow
+* Selecting a marker displays the respective Infowindow and centers the map
 * Clicking a marker on the map which has an open Infowindow will close the Infowindow
 * Map is customized to make places stand out
 * Map uses customized icons for places
-* Opening an Infowindow will display a carousel of pictures if any are available for the location on Flickr
+* Flickr API used to retrieve relevant photos for marker's geo location and name
+* Timeouts retrieving photo URLs from Flickr are handled gracefully
 
 # Files
 * index.html - Entry point for application
