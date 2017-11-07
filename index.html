@@ -54,15 +54,13 @@ Using Boostrap Grid system for responsive design
             <div class="col-xs-2">
                 <div class="row input-group">
                     <input type="text" data-bind="textInput: placesSearch" class="form-control" placeholder="Search">
-                    <a href="#" data-bind="click: filterPlaces" class="input-group-addon">
-                        <span id="filter-label" class="glyphicon glyphicon-filter "></span>
-                    </a>
+                    <span id="filter-label" class="input-group-addon glyphicon glyphicon-filter "></span>
                 </div>
-
 
                 <div class="row">
                     <ul data-bind="foreach: placesList" class="list-group">
-                        <li class="list-group-item" data-bind="text: name, click: placeListViewModel.listItemClick"></li>
+                        <li class="list-group-item"
+                            data-bind="text: name, click: placeListViewModel.listItemClick"></li>
                     </ul>
                 </div>
             </div>

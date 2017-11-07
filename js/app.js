@@ -21,12 +21,9 @@ var model = {
      * and stylize appropriately
      */
     mapConfig: {
-        zoom: 11,
         disableDefaultUI: true,
         navigationControl: false,
         mapTypeControl: false,
-        // scaleControl: false,
-        // draggable: false,
         styles: [
             {
                 featureType: 'road',
@@ -47,12 +44,24 @@ var model = {
         /**
          * Array of Places used for both the Search and the Map Markers
          */
-        this.places = [new this.Place("My home", 'home', {lat: 51.138725, lng: 0.591060}),
+        this.places = [new this.Place("Well House", 'home', {lat: 51.138725, lng: 0.591060}),
             new this.Place("Sissinghurst Castle", 'castle', {lat: 51.115282, lng: 0.582349}),
             new this.Place("Scotney Castle", 'castle', {lat: 51.092852, lng: 0.408211}),
             new this.Place("Leeds Castle", 'castle', {lat: 51.248918, lng: 0.630465}),
             new this.Place("Chapel Down Winery", 'eatery', {lat: 51.040965, lng: 0.699023}),
-            new this.Place("The West House", 'eatery', {lat: 51.115184, lng: 0.642370})]
+            new this.Place("The West House", 'eatery', {lat: 51.115184, lng: 0.642370}),
+            new this.Place("Frasers", 'eatery', {lat: 51.186404, lng: 0.695287}),
+            new this.Place("The Windmill", 'eatery', {lat: 51.261533, lng: 0.626266}),
+            new this.Place("Apicius", 'eatery', {lat: 51.095989, lng: 0.536717}),
+            new this.Place("The Poet", 'eatery', {lat: 51.154057, lng: 0.373423}),
+            new this.Place("Smarden Bell", 'eatery', {lat: 51.155260, lng: 0.672364}),
+            new this.Place("Knoxbridge Inn", 'eatery', {lat: 51.136965, lng: 0.555603}),
+            new this.Place("Bodiam Castle", 'castle', {lat: 51.002210, lng: 0.543565}),
+            new this.Place("Star & Eagle Hotel", 'eatery', {lat: 51.113434, lng: 0.460524}),
+            new this.Place("The Bull", 'eatery', {lat: 51.066421, lng: 0.581696}),
+            new this.Place("White Lion", 'eatery', {lat: 51.067804, lng: 0.686681}),
+            new this.Place("Tickled Trout", 'eatery', {lat: 51.246928, lng: 0.453419})
+        ]
     }
 };
 
@@ -128,10 +137,10 @@ var gmapViewModel = {
                     method: 'flickr.photos.search',
                     api_key: '0c4a27aacfa7626d6870ebd4901b25f5',
                     format: 'rest',
-                    name: place.name,
+                    text: place.name,
                     lat: place.coord.lat,
                     lon: place.coord.lng,
-                    radius: 1,
+                    radius: 0.1,
                     has_geo: 1
                 },
                 timeout: 2000 /* 2 seconds to retrieve or give up */
@@ -145,7 +154,7 @@ var gmapViewModel = {
                 var i = 0;
                 var carousel = "<div id=\"carousel-example-generic\" class=\"carousel slide\" data-ride=\"carousel\">";
                 carousel += "<div class=\"carousel-inner\" role=\"listbox\">"
-                while (i < 5) {
+                while (i < 15 && i<photo.length) {
                     var farm = photo.attr('farm');
                     var server = photo.attr('server');
                     var id = photo.attr('id');
@@ -183,7 +192,7 @@ var gmapViewModel = {
      * Create a marker for the specified place
      * with the appropriate icon and call the
      * infowindow setup
-     * @param place
+     * @param marker Used for extending bounds of map
      */
     addMarker: function (place) {
         var self = this;
@@ -211,6 +220,7 @@ var gmapViewModel = {
             }
         });
         self.markerList.push(marker);
+        return marker
     },
 
     /**
@@ -229,17 +239,26 @@ var gmapViewModel = {
         self.markerList = [];
         model.lastClicked = undefined;
         /**
+         * Set map bounds based on the markers
+         * that are in the list
+         */
+        if (places.length > 0) {
+            var bounds = new google.maps.LatLngBounds();
+            places.forEach(function (place, i) {
+                bounds.extend(place.coord);
+            });
+            self.map.fitBounds(bounds);
+        }
+        /**
          * For each of the supplied places
          * (either default or filtered)
          * loop and create a marker with
          * a click listener
          */
         places.forEach(function (place,i) {
-            console.log(i);
             setTimeout(function() {
-                self.addMarker(place);
-            }, i*200);
-
+                var marker = self.addMarker(place);
+            }, i*75);
         });
     },
 
@@ -324,7 +343,15 @@ var placeListViewModel = {
          * using the default list in the Model
          */
         var self = this;
-        model.places.forEach(function (place, index) {
+        model.places.sort(function comp(a,b) {
+            console.log (a,b);
+            if (a.name<b.name) {
+                return -1
+            } else if (a.name>b.name) {
+                return 1
+            }
+            return 0
+        }).forEach(function (place, index) {
             place.id = index;
             self.placesList.push(place);
         });
@@ -342,6 +369,15 @@ var placeListViewModel = {
     init: function () {
         model.init();
         this.populatePlacesList();
+        var self=this;
+        /**
+         * Subscribe to search box changes
+         * to automatically update the
+         * markers and map bounds
+         */
+        this.placesSearch.subscribe(function (newText) {
+            self.filterPlaces();
+        });
     }
 };
 
