@@ -1,21 +1,30 @@
-
-/*a {*/
-    /*height: 100%;*/
-/*}*/
+#hamburger-icon {
+    font-size: 1.2em;
+    padding: 15px;
+}
 
 #filter-label {
     top: 0px;
 }
 
 #map {
-    height: 0;
+    height: 100%;
     overflow: hidden;
     padding-bottom: 100%;
     padding-top: 30px;
     position: relative;
 }
 
+h3 {
+    color: #6666bb;
+}
+
 .info-place-name {
     font-size: 200%;
     font-weight: bold;
+    color: #6666ff;
+}
+
+img {
+    max-height: 200px;
 }

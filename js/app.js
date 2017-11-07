@@ -15,6 +15,8 @@ var model = {
 
     neighborhoodGeo: {/* This is my neighborhood */ lat: 51.1414, lng: 0.5894},
 
+    carousel_photo_limit: 10,
+
     /**
      * Default map configuration
      * to center over neighborhood
@@ -106,13 +108,56 @@ var gmapViewModel = {
         }
     },
 
+
+    /**
+     * Generate HTML representing a selection of photos returned from Flickr API
+     *
+     * @param photo - First photo element from Flickr query
+     * @returns {string} - HTML Text representing the Bootstrap Photo Carousel
+     */
+    create_photo_carousel: function (photo) {
+        console.dir(photo.length);
+
+        if (photo.length === 0) {
+            return '<p>This place currently has no photos on Flickr.  Maybe you\'d like to upload some?</p>';
+        }
+
+        var i = 0;
+        var carousel = '<div id="carousel-example-generic" class="carousel slide" data-ride="carousel">' +
+            '<div class="carousel-inner" role="listbox">';
+        while (i < model.carousel_photo_limit && i < photo.length) {
+            var farm = photo.attr('farm');
+            var server = photo.attr('server');
+            var id = photo.attr('id');
+            var secret = photo.attr('secret');
+            var url = "https://farm"
+                + farm + ".staticflickr.com/"
+                + server + "/"
+                + id + "_" + secret + ".jpg";
+
+            carousel += '<div class="item ' + (i === 0 ? 'active' : '') + ' "><img  class="info-picture" height="200px" src=' + url + ' ></div>';
+            photo = photo.next();
+            i++;
+        }
+        carousel += '</div><a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">\n' +
+            '    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>\n' +
+            '    <span class="sr-only">Previous</span>\n' +
+            '  </a>\n' +
+            '  <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">\n' +
+            '    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>\n' +
+            '    <span class="sr-only">Next</span>\n' +
+            '  </a></div>';
+        return carousel;
+    },
+
+
     /**
      * Create an InfoWindow for the specified Marker
      * (with supplied place details)
-     * @param marker Marker for infowindow
-     * @param place Place referenced by marker
+     * @param marker - Marker for infowindow
+     * @param place - Place referenced by marker
      */
-    createInfoWindow: function (marker,place) {
+    createInfoWindow: function (marker, place) {
 
         var self = this;
 
@@ -141,7 +186,8 @@ var gmapViewModel = {
                     lat: place.coord.lat,
                     lon: place.coord.lng,
                     radius: 0.1,
-                    has_geo: 1
+                    has_geo: 1,
+                    per_page: model.carousel_photo_limit
                 },
                 timeout: 2000 /* 2 seconds to retrieve or give up */
             })
@@ -151,31 +197,9 @@ var gmapViewModel = {
                 several to generate a carousel of pictures
                  */
                 var photo = $(xml).find("photo");
-                var i = 0;
-                var carousel = "<div id=\"carousel-example-generic\" class=\"carousel slide\" data-ride=\"carousel\">";
-                carousel += "<div class=\"carousel-inner\" role=\"listbox\">"
-                while (i < 15 && i<photo.length) {
-                    var farm = photo.attr('farm');
-                    var server = photo.attr('server');
-                    var id = photo.attr('id');
-                    var secret = photo.attr('secret');
-                    var url = "https://farm"
-                        + farm + ".staticflickr.com/"
-                        + server + "/"
-                        + id + "_" + secret + ".jpg";
 
-                    carousel += "<div class=\"item " + (i === 0 ? "active" : "") + " \"><img  class=\"info-picture\" height=\"200px\" src=" + url + " ></div>";
-                    photo = photo.next();
-                    i++;
-                }
-                carousel += "</div><a class=\"left carousel-control\" href=\"#carousel-example-generic\" role=\"button\" data-slide=\"prev\">\n" +
-                    "    <span class=\"glyphicon glyphicon-chevron-left\" aria-hidden=\"true\"></span>\n" +
-                    "    <span class=\"sr-only\">Previous</span>\n" +
-                    "  </a>\n" +
-                    "  <a class=\"right carousel-control\" href=\"#carousel-example-generic\" role=\"button\" data-slide=\"next\">\n" +
-                    "    <span class=\"glyphicon glyphicon-chevron-right\" aria-hidden=\"true\"></span>\n" +
-                    "    <span class=\"sr-only\">Next</span>\n" +
-                    "  </a></div>";
+                var carousel = self.create_photo_carousel(photo);
+
                 var content = '<div id="info-window"><div class="info-place-name">' + place.name + '</div>' + carousel + "</div>";
                 self.infowindow.setContent(content);
                 self.infowindow.open(self.map, marker);
@@ -187,12 +211,12 @@ var gmapViewModel = {
 
         self.bounceMarkerOnce(marker);
     },
-    
+
     /**
      * Create a marker for the specified place
      * with the appropriate icon and call the
      * infowindow setup
-     * @param marker Used for extending bounds of map
+     * @param marker - Used for extending bounds of map
      */
     addMarker: function (place) {
         var self = this;
@@ -209,7 +233,7 @@ var gmapViewModel = {
              * If so, don't reanimate it, because that's distracting
              */
             if (model.lastClicked !== place.id) {
-                self.createInfoWindow(marker,place);
+                self.createInfoWindow(marker, place);
             } else {
                 /**
                  * User has re-clicked the SAME marker...
@@ -255,10 +279,10 @@ var gmapViewModel = {
          * loop and create a marker with
          * a click listener
          */
-        places.forEach(function (place,i) {
-            setTimeout(function() {
+        places.forEach(function (place, i) {
+            setTimeout(function () {
                 var marker = self.addMarker(place);
-            }, i*75);
+            }, i * 75);
         });
     },
 
@@ -269,6 +293,7 @@ var gmapViewModel = {
          */
         google.maps.event.trigger(this.markerList[id], 'click');
     },
+
 
     /**
      * Called from index.html once both jQuery and the Google API
@@ -314,7 +339,16 @@ var gmapViewModel = {
 var placeListViewModel = {
 
     placesSearch: ko.observable(),
+
     placesList: ko.observableArray([]),
+
+    showPlaceList: ko.observable(true),
+
+    // toggleMenu: function () {
+    //     this.showPlaceList(this.showPlaceList() ? false : true);
+    //     gmapViewModel.redrawMap();
+    //     // alert (this.showPlaceList)
+    // },
 
     filterPlaces: function () {
         /**
@@ -343,11 +377,10 @@ var placeListViewModel = {
          * using the default list in the Model
          */
         var self = this;
-        model.places.sort(function comp(a,b) {
-            console.log (a,b);
-            if (a.name<b.name) {
+        model.places.sort(function comp(a, b) {
+            if (a.name < b.name) {
                 return -1
-            } else if (a.name>b.name) {
+            } else if (a.name > b.name) {
                 return 1
             }
             return 0
@@ -369,7 +402,7 @@ var placeListViewModel = {
     init: function () {
         model.init();
         this.populatePlacesList();
-        var self=this;
+        var self = this;
         /**
          * Subscribe to search box changes
          * to automatically update the

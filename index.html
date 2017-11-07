@@ -26,51 +26,39 @@
 Using Boostrap Grid system for responsive design
 -->
 <div class="container">
-    <div class="row">
 
         <div class="row">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">Castles & Eateries</a>
-            </div>
-
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-                    <li><a href="#">
-                        <span class="glyphicon glyphicon-menu-hamburger"></span>
-                    </a></li>
-                </ul>
+            <div class="col-xs-12">
+                <h3>Castles & Eateries</h3>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-2">
+
+            <div class="col-sm-2 hidden-xs" data-bind="visible: showPlaceList">
+
+                <!-- User input for filtering places by name -->
                 <div class="row input-group">
                     <input type="text" data-bind="textInput: placesSearch" class="form-control" placeholder="Search">
                     <span id="filter-label" class="input-group-addon glyphicon glyphicon-filter "></span>
                 </div>
 
+                <!-- List of places that can be clicked and filtered -->
                 <div class="row">
                     <ul data-bind="foreach: placesList" class="list-group">
                         <li class="list-group-item"
                             data-bind="text: name, click: placeListViewModel.listItemClick"></li>
                     </ul>
                 </div>
+
             </div>
 
-            <div class="col-xs-10">
+            <!-- Placeholder for the map -->
+            <div class="col-xs-12 col-sm-10">
                 <div id="map"></div>
             </div>
 
         </div>
-    </div>
 </div>
 </body>
 </html>
