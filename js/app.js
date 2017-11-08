@@ -307,6 +307,15 @@ var gmapViewModel = {
 
 
     /**
+     * Error handler in case Google Map API fails to load
+     */
+    failedToLoadApi: function() {
+        mapElem = $('.container');
+        mapElem.html('<h3>Oops, the Google Map API could not be loaded.  Please try again later.</h3>')
+    },
+
+
+    /**
      * Called from index.html once both jQuery and the Google API
      * map library is ready and is setup in the global scope
      */
