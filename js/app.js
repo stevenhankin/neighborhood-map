@@ -72,7 +72,7 @@ var model = {
             new this.place("The Bull", 'eatery', {lat: 51.066421, lng: 0.581696}),
             new this.place("White Lion", 'eatery', {lat: 51.067804, lng: 0.686681}),
             new this.place("Tickled Trout", 'eatery', {lat: 51.246928, lng: 0.453419})
-        ]
+        ];
     }
 };
 
@@ -97,7 +97,7 @@ var gmapViewModel = {
         marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function () {
             marker.setAnimation(null);
-        }, 1400)
+        }, 1400);
     },
 
 
@@ -138,10 +138,10 @@ var gmapViewModel = {
             var server = photo.attr('server');
             var id = photo.attr('id');
             var secret = photo.attr('secret');
-            var url = "https://farm"
-                + farm + ".staticflickr.com/"
-                + server + "/"
-                + id + "_" + secret + ".jpg";
+            var url = "https://farm"                +
+                farm + ".staticflickr.com/" +
+                server + "/"+
+                id + "_" + secret + ".jpg";
 
             carousel += '<div class="item ' + (i === 0 ? 'active' : '') + ' ">' +
                 '<img  class="info-picture" height="200px" src=' + url + ' ></div>';
@@ -208,13 +208,13 @@ var gmapViewModel = {
                  */
                 var photo = $(xml).find("photo");
                 var carousel = self.createPhotoCarousel(photo);
-                var content = '<div id="info-window"><div class="info-place-name">' + place.name + '</div>'
-                    + carousel + "</div>";
+                var content = '<div id="info-window"><div class="info-place-name">' + place.name + '</div>' +
+                    carousel + "</div>";
                 self.infowindow.setContent(content);
             })
             .fail(function () {
-                self.infowindow.setContent('<div class="info-place-name">' + place.name
-                    + '</div>(Sorry, we are unable to retrieve pictures at the moment)');
+                self.infowindow.setContent('<div class="info-place-name">' + place.name +
+                    '</div>(Sorry, we are unable to retrieve pictures at the moment)');
             });
         self.bounceMarkerOnce(marker);
     },
@@ -252,7 +252,7 @@ var gmapViewModel = {
             }
         });
         self.markerList.push(marker);
-        return marker
+        return marker;
     },
 
 
@@ -360,7 +360,7 @@ var placeListViewModel = {
 
 
     placesSearch: ko.observable(),
-    
+
     placesList: ko.observableArray([]),
 
 
@@ -394,11 +394,11 @@ var placeListViewModel = {
         var self = this;
         model.places.sort(function comp(a, b) {
             if (a.name < b.name) {
-                return -1
+                return -1;
             } else if (a.name > b.name) {
-                return 1
+                return 1;
             }
-            return 0
+            return 0;
         }).forEach(function (place, index) {
             place.id = index;
             self.placesList.push(place);
