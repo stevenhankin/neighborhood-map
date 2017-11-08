@@ -372,6 +372,18 @@ var placeListViewModel = {
 
     placesList: ko.observableArray([]),
 
+    showSidebar: ko.observable(true),
+
+
+    /**
+     * Flip the truthy value of sidebar toggle
+     * 2-way databinding will ensure sidebar is hidden/shown
+     * and map resized as required
+     */
+    toggleSidebar: function () {
+        this.showSidebar (this.showSidebar()?false:true)
+    },
+
 
     filterPlaces: function () {
         /**

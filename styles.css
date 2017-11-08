@@ -10,8 +10,13 @@
     position: relative;
 }
 
-h3 {
+h4 {
     color: #6666bb;
+}
+
+#hamburger-icon {
+    font-size: 1.4em;
+    padding-top: 12px;
 }
 
 .info-place-name {

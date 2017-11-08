@@ -18,7 +18,7 @@ main application which is local) during HTML parsing
 # Features
 * Responsive design achieved through Bootstrap Grid system
 * Data binding of both Search Text and Places List through Knockout Observables
-* On small devices, the sidebar automatically disappears to allow map to fill all available space
+* The sidebar can be hidden by clicking the hamburger icon, allowing the map to fill all available space
 * Typing in search box automatically filters list of places and map markers, resizing map as required
 * Clicking a place on sidebar automatically selects place on map and opens Infowindow
 * Selecting a marker displays the respective Infowindow and centers the map
