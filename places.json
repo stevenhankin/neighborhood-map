@@ -1,0 +1,138 @@
+[
+  {
+    "name": "Well House",
+    "type": "home",
+    "coord": {
+      "lat": 51.138725,
+      "lng": 0.59106
+    }
+  },
+  {
+    "name": "Sissinghurst Castle",
+    "type": "castle",
+    "coord": {
+      "lat": 51.115282,
+      "lng": 0.582349
+    }
+  },
+  {
+    "name": "Scotney Castle",
+    "type": "castle",
+    "coord": {
+      "lat": 51.092852,
+      "lng": 0.408211
+    }
+  },
+  {
+    "name": "Leeds Castle",
+    "type": "castle",
+    "coord": {
+      "lat": 51.248918,
+      "lng": 0.630465
+    }
+  },
+  {
+    "name": "Chapel Down Winery",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.040965,
+      "lng": 0.699023
+    }
+  },
+  {
+    "name": "The West House",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.115184,
+      "lng": 0.64237
+    }
+  },
+  {
+    "name": "Frasers",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.186404,
+      "lng": 0.695287
+    }
+  },
+  {
+    "name": "The Windmill",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.261533,
+      "lng": 0.626266
+    }
+  },
+  {
+    "name": "Apicius",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.095989,
+      "lng": 0.536717
+    }
+  },
+  {
+    "name": "The Poet",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.154057,
+      "lng": 0.373423
+    }
+  },
+  {
+    "name": "Smarden Bell",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.15526,
+      "lng": 0.672364
+    }
+  },
+  {
+    "name": "Knoxbridge Inn",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.136965,
+      "lng": 0.555603
+    }
+  },
+  {
+    "name": "Bodiam Castle",
+    "type": "castle",
+    "coord": {
+      "lat": 51.00221,
+      "lng": 0.543565
+    }
+  },
+  {
+    "name": "Star & Eagle Hotel",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.113434,
+      "lng": 0.460524
+    }
+  },
+  {
+    "name": "The Bull",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.066421,
+      "lng": 0.581696
+    }
+  },
+  {
+    "name": "White Lion",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.067804,
+      "lng": 0.686681
+    }
+  },
+  {
+    "name": "Tickled Trout",
+    "type": "eatery",
+    "coord": {
+      "lat": 51.246928,
+      "lng": 0.453419
+    }
+  }
+]

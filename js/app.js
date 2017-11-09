@@ -14,6 +14,12 @@ var model = {
     },
 
     /**
+     * Array of Places used for both the Search and the Map Markers
+     * Will be populated from json data
+     */
+    places: [],
+
+    /**
      * This is my neighborhood location
      */
     neighborhoodGeo: {lat: 51.1414, lng: 0.5894},
@@ -23,7 +29,7 @@ var model = {
      * and keep the number of photos on Carousel
      * to a reasonable number
      */
-    carousel_photo_limit: 10,
+    carouselPhotoLimit: 10,
 
     /**
      * Default map configuration
@@ -50,30 +56,33 @@ var model = {
             }]
     },
 
-    init: function () {
-        /**
-         * Array of Places used for both the Search and the Map Markers
-         */
-        this.places = [
-            new this.place("Well House", 'home', {lat: 51.138725, lng: 0.591060}),
-            new this.place("Sissinghurst Castle", 'castle', {lat: 51.115282, lng: 0.582349}),
-            new this.place("Scotney Castle", 'castle', {lat: 51.092852, lng: 0.408211}),
-            new this.place("Leeds Castle", 'castle', {lat: 51.248918, lng: 0.630465}),
-            new this.place("Chapel Down Winery", 'eatery', {lat: 51.040965, lng: 0.699023}),
-            new this.place("The West House", 'eatery', {lat: 51.115184, lng: 0.642370}),
-            new this.place("Frasers", 'eatery', {lat: 51.186404, lng: 0.695287}),
-            new this.place("The Windmill", 'eatery', {lat: 51.261533, lng: 0.626266}),
-            new this.place("Apicius", 'eatery', {lat: 51.095989, lng: 0.536717}),
-            new this.place("The Poet", 'eatery', {lat: 51.154057, lng: 0.373423}),
-            new this.place("Smarden Bell", 'eatery', {lat: 51.155260, lng: 0.672364}),
-            new this.place("Knoxbridge Inn", 'eatery', {lat: 51.136965, lng: 0.555603}),
-            new this.place("Bodiam Castle", 'castle', {lat: 51.002210, lng: 0.543565}),
-            new this.place("Star & Eagle Hotel", 'eatery', {lat: 51.113434, lng: 0.460524}),
-            new this.place("The Bull", 'eatery', {lat: 51.066421, lng: 0.581696}),
-            new this.place("White Lion", 'eatery', {lat: 51.067804, lng: 0.686681}),
-            new this.place("Tickled Trout", 'eatery', {lat: 51.246928, lng: 0.453419})
-        ];
-    }
+
+    /**
+     * Utility to add a place element into the places list
+     * @param aPlace - One place element from JSON data file
+     */
+    addPlace: function (aPlace) {
+        this.places.push(new this.place(aPlace.name, aPlace.type, aPlace.coord));
+    },
+
+
+    /**
+     * Load place data from JSON file asynchronously as a returned Promise
+     * @returns {Promise}
+     */
+    loadPlaces: function () {
+        return new Promise(function (resolve, reject) {
+            $.getJSON('places.json').done(function (response) {
+                response.forEach(function (place) {
+                    model.addPlace(place);
+                });
+                resolve();
+            }).fail(function () {
+                mapElem = $('.container');
+                mapElem.html('<h4>Oops, failed to load the Places data.  Please try again later.</h4>')
+                reject();
+            });
+        });}
 };
 
 
@@ -133,14 +142,14 @@ var gmapViewModel = {
         var i = 0;
         var carousel = '<div id="carousel-example-generic" class="carousel slide" data-ride="carousel">' +
             '<div class="carousel-inner" role="listbox">';
-        while (i < model.carousel_photo_limit && i < photo.length) {
+        while (i < model.carouselPhotoLimit && i < photo.length) {
             var farm = photo.attr('farm');
             var server = photo.attr('server');
             var id = photo.attr('id');
             var secret = photo.attr('secret');
-            var url = "https://farm"                +
+            var url = "https://farm" +
                 farm + ".staticflickr.com/" +
-                server + "/"+
+                server + "/" +
                 id + "_" + secret + ".jpg";
 
             carousel += '<div class="item ' + (i === 0 ? 'active' : '') + ' ">' +
@@ -196,7 +205,7 @@ var gmapViewModel = {
                     lon: place.coord.lng,
                     radius: 0.1,
                     has_geo: 1,
-                    per_page: model.carousel_photo_limit
+                    per_page: model.carouselPhotoLimit
                 },
                 timeout: 2000 /* 2 seconds to retrieve or give up - don't want to keep user waiting! */
             })
@@ -309,9 +318,9 @@ var gmapViewModel = {
     /**
      * Error handler in case Google Map API fails to load
      */
-    failedToLoadApi: function() {
+    failedToLoadApi: function () {
         mapElem = $('.container');
-        mapElem.html('<h3>Oops, the Google Map API could not be loaded.  Please try again later.</h3>')
+        mapElem.html('<h4>Oops, the Google Map API could not be loaded.  Please try again later.</h4>')
     },
 
 
@@ -326,40 +335,51 @@ var gmapViewModel = {
          * No Knockout bindings to apply to Map View Model, since Google Map has built-in handling
          */
         ko.applyBindings(placeListViewModel);
-        placeListViewModel.init();
 
-        this.map = new google.maps.Map(document.getElementById('map'), model.mapConfig);
-        this.map.setCenter(model.neighborhoodGeo);
-        /**
-         * Comment take from Google API Documentation:
-         * Best practices: For the best user experience, only one info window should be open on the map at any
-         * one time. Multiple info windows make the map appear cluttered. If you only need one info window at a time,
-         * you can create just one InfoWindow object and open it at different locations or markers upon map events,
-         * such as user clicks. If you do need more than one info window, you can display multiple InfoWindow objects
-         * at the same time
-         */
-        this.infowindow = new google.maps.InfoWindow({});
-        /**
-         * Once closed, the map should re-center to the original location
-         */
         var self = this;
-        this.infowindow.addListener('closeclick', function () {
-            // self.map.setCenter({/* This is my neighborhood */ lat: 51.1414, lng: 0.5894});
-            self.map.setCenter(model.neighborhoodGeo);
 
-        });
         /**
-         * Once an infowindow is closed, we need to reset lastClick,
-         * otherwise if we try to click the same marker again the
-         * infowindow won't open
+         * The Places are stored in a JSON data file, which will be loaded async,
+         * therefore we need to use a Promise to ensure that we execute the
+         * remaining code once the Place data is hydrated in the (near) future
          */
-        google.maps.event.addListener(this.infowindow, 'closeclick', function () {
-            model.lastClicked = undefined;
-        });
-        /**
-         * Map is ready so let's create ALL the markers by default..
-         */
-        this.createMarkers(model.places);
+        model.loadPlaces().then(
+            function () {
+                placeListViewModel.init();
+
+                self.map = new google.maps.Map(document.getElementById('map'), model.mapConfig);
+                self.map.setCenter(model.neighborhoodGeo);
+                /**
+                 * Comment take from Google API Documentation:
+                 * Best practices: For the best user experience, only one info window should be open on the map at any
+                 * one time. Multiple info windows make the map appear cluttered. If you only need one info window at a time,
+                 * you can create just one InfoWindow object and open it at different locations or markers upon map events,
+                 * such as user clicks. If you do need more than one info window, you can display multiple InfoWindow objects
+                 * at the same time
+                 */
+                self.infowindow = new google.maps.InfoWindow({});
+                /**
+                 * Once closed, the map should re-center to the original location
+                 */
+                self.infowindow.addListener('closeclick', function () {
+                    // self.map.setCenter({/* This is my neighborhood */ lat: 51.1414, lng: 0.5894});
+                    self.map.setCenter(model.neighborhoodGeo);
+
+                });
+                /**
+                 * Once an infowindow is closed, we need to reset lastClick,
+                 * otherwise if we try to click the same marker again the
+                 * infowindow won't open
+                 */
+                google.maps.event.addListener(self.infowindow, 'closeclick', function () {
+                    model.lastClicked = undefined;
+                });
+                /**
+                 * Map is ready so let's create ALL the markers by default..
+                 */
+                self.createMarkers(model.places);
+
+            });
 
     }
 };
@@ -381,7 +401,7 @@ var placeListViewModel = {
      * and map resized as required
      */
     toggleSidebar: function () {
-        this.showSidebar (this.showSidebar()?false:true)
+        this.showSidebar(this.showSidebar() ? false : true)
     },
 
 
@@ -442,16 +462,16 @@ var placeListViewModel = {
      * Called when the Map Model View is ready to initialise
      */
     init: function () {
-        model.init();
+
         this.populatePlacesList();
-        var self = this;
         /**
          * Subscribe to search box changes
          * to automatically update the
          * markers and map bounds
          */
         this.placesSearch.subscribe(function () {
-            self.filterPlaces();
+            this.filterPlaces();
         });
+        
     }
 };
