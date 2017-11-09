@@ -69,7 +69,7 @@ var model = {
 
     /**
      * Load place data from JSON file asynchronously as a returned Promise
-     * @returns {Promise}
+     * @returns {Promise} - Promise for reading JSON file of places into Model
      */
     loadPlaces: function () {
         return new Promise(function (resolve, reject) {
@@ -79,8 +79,8 @@ var model = {
                 });
                 resolve();
             }).fail(function () {
-                mapElem = $('.container');
-                mapElem.html('<h4>Oops, failed to load the Places data.  Please try again later.</h4>')
+                var mapElem = $('.container');
+                mapElem.html('<h4>Oops, failed to load the Places data.  Please try again later.</h4>');
                 reject();
             });
         });
@@ -305,7 +305,7 @@ var gmapViewModel = {
          * Set the markers that correspond to the list of places
          * as visible
          */
-        places.forEach(function (place, i) {
+        places.forEach(function (place) {
             self.markerList[place.id].setVisible(true);
         });
     },
@@ -325,8 +325,8 @@ var gmapViewModel = {
      * Error handler in case Google Map API fails to load
      */
     failedToLoadApi: function () {
-        mapElem = $('.container');
-        mapElem.html('<h4>Oops, the Google Map API could not be loaded.  Please try again later.</h4>')
+        var mapElem = $('.container');
+        mapElem.html('<h4>Oops, the Google Map API could not be loaded.  Please try again later.</h4>');
     },
 
 
@@ -403,7 +403,7 @@ var placeListViewModel = {
      * and map resized as required
      */
     toggleSidebar: function () {
-        this.showSidebar(!this.showSidebar())
+        this.showSidebar(!this.showSidebar());
     },
 
 
