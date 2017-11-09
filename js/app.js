@@ -40,6 +40,7 @@ var model = {
         disableDefaultUI: true,
         navigationControl: false,
         mapTypeControl: false,
+        zoom: 11,
         styles: [
             {
                 featureType: 'road',
@@ -82,7 +83,8 @@ var model = {
                 mapElem.html('<h4>Oops, failed to load the Places data.  Please try again later.</h4>')
                 reject();
             });
-        });}
+        });
+    }
 };
 
 
@@ -265,20 +267,28 @@ var gmapViewModel = {
     },
 
 
+    createMarkers: function (places) {
+
+        var self = this;
+        places.forEach(function (place) {
+            self.addMarker(place);
+        });
+        console.dir(self.markerList);
+    },
+
+
     /**
-     * Create Google Map Markers for supplied places
+     * Show markers for places that are not filtered out, and hide the remaining
      * @param places - List of places (possibly filtered)
      */
-    createMarkers: function (places) {
+    showMarkers: function (places) {
         var self = this;
         /**
-         *  Remove the existing markers and
-         *  reset the last marker click tracker
+         *  Set all markers invisible at first
          */
         self.markerList.forEach(function (marker) {
-            marker.setMap(null);
+            marker.setVisible(false);
         });
-        self.markerList = [];
         model.lastClicked = undefined;
         /**
          * Set map bounds based on the markers
@@ -292,15 +302,11 @@ var gmapViewModel = {
             self.map.fitBounds(bounds);
         }
         /**
-         * For each of the supplied places
-         * (either default or filtered)
-         * loop and create a marker with
-         * a click listener
+         * Set the markers that correspond to the list of places
+         * as visible
          */
         places.forEach(function (place, i) {
-            setTimeout(function () {
-                self.addMarker(place);
-            }, i * 75);
+            self.markerList[place.id].setVisible(true);
         });
     },
 
@@ -345,10 +351,12 @@ var gmapViewModel = {
          */
         model.loadPlaces().then(
             function () {
+
                 placeListViewModel.init();
 
                 self.map = new google.maps.Map(document.getElementById('map'), model.mapConfig);
                 self.map.setCenter(model.neighborhoodGeo);
+
                 /**
                  * Comment take from Google API Documentation:
                  * Best practices: For the best user experience, only one info window should be open on the map at any
@@ -362,9 +370,7 @@ var gmapViewModel = {
                  * Once closed, the map should re-center to the original location
                  */
                 self.infowindow.addListener('closeclick', function () {
-                    // self.map.setCenter({/* This is my neighborhood */ lat: 51.1414, lng: 0.5894});
                     self.map.setCenter(model.neighborhoodGeo);
-
                 });
                 /**
                  * Once an infowindow is closed, we need to reset lastClick,
@@ -378,15 +384,12 @@ var gmapViewModel = {
                  * Map is ready so let's create ALL the markers by default..
                  */
                 self.createMarkers(model.places);
-
             });
-
     }
 };
 
 
 var placeListViewModel = {
-
 
     placesSearch: ko.observable(),
 
@@ -394,14 +397,13 @@ var placeListViewModel = {
 
     showSidebar: ko.observable(true),
 
-
     /**
      * Flip the truthy value of sidebar toggle
      * 2-way databinding will ensure sidebar is hidden/shown
      * and map resized as required
      */
     toggleSidebar: function () {
-        this.showSidebar(this.showSidebar() ? false : true)
+        this.showSidebar(!this.showSidebar())
     },
 
 
@@ -423,7 +425,7 @@ var placeListViewModel = {
             }
         );
         this.placesList(newPlacesList);
-        gmapViewModel.createMarkers(newPlacesList);
+        gmapViewModel.showMarkers(newPlacesList);
     },
 
 
@@ -463,6 +465,7 @@ var placeListViewModel = {
      */
     init: function () {
 
+        var self = this;
         this.populatePlacesList();
         /**
          * Subscribe to search box changes
@@ -470,8 +473,8 @@ var placeListViewModel = {
          * markers and map bounds
          */
         this.placesSearch.subscribe(function () {
-            this.filterPlaces();
+            self.filterPlaces();
         });
-        
+
     }
 };
