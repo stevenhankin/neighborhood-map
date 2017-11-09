@@ -6,7 +6,10 @@ via the left-hand bar) queries Flickr for photos based on the geo
 location of the marker.
 
 # Getting started
-Open [index.html](index.html) in a browser
+1) Start a local http server, perhaps using one of the following:
+    * python3 -m http.server 8080       (if using Python 3)
+    * python -m SimpleHTTPServer 8080   (if using Python 2)
+2) Open [http://localhost:8080](http://localhost:8080) in a browser
 
 # How it works
 1) When index.html is opened in a browser, the Javascript libraries are downloaded (from a CDN, except for the 
