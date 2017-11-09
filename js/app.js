@@ -91,14 +91,6 @@ var model = {
 var gmapViewModel = {
 
     /**
-     * As per project rubric, we're not going to track markers as Observables
-     * Instead, we have a vanilla array so that we can locate a marker as
-     * required (the index will be the same as the Places index, for simplicity)
-     */
-    markerList: [],
-
-
-    /**
      * Animate marker with 2 bounces
      * This is to get the user's attention, but not annoy or distract
      *
@@ -188,10 +180,10 @@ var gmapViewModel = {
          */
         self.infowindow.setContent('Retrieving data..');
         /*
-        Re-center map to marker, because the infowindow might have
-        large photos that we don't want overspilling top of window
+        Pan to marker (smoother transition than setCenter), because the infowindow
+        might have large photos that we don't want overspilling top of window
          */
-        self.map.setCenter(marker.getPosition());
+        self.map.panTo(marker.getPosition());
         model.lastClicked = place.id;
 
         var flickrUrl = "https://api.flickr.com/services/rest/";
@@ -262,62 +254,31 @@ var gmapViewModel = {
                 model.lastClicked = undefined;
             }
         });
-        self.markerList.push(marker);
         return marker;
     },
 
 
-    createMarkers: function (places) {
-
-        var self = this;
-        places.forEach(function (place) {
-            self.addMarker(place);
-        });
-        console.dir(self.markerList);
-    },
-
-
     /**
-     * Show markers for places that are not filtered out, and hide the remaining
-     * @param places - List of places (possibly filtered)
+     * For each Place, a marker is added and
+     * stored within the place object
+     * @param places
      */
-    showMarkers: function (places) {
+    createMarkers: function (places) {
         var self = this;
-        /**
-         *  Set all markers invisible at first
-         */
-        self.markerList.forEach(function (marker) {
-            marker.setVisible(false);
-        });
-        model.lastClicked = undefined;
-        /**
-         * Set map bounds based on the markers
-         * that are in the list
-         */
-        if (places.length > 0) {
-            var bounds = new google.maps.LatLngBounds();
-            places.forEach(function (place) {
-                bounds.extend(place.coord);
-            });
-            self.map.fitBounds(bounds);
-        }
-        /**
-         * Set the markers that correspond to the list of places
-         * as visible
-         */
         places.forEach(function (place) {
-            self.markerList[place.id].setVisible(true);
+            place.marker = self.addMarker(place);
         });
+        this.setBoundsToMarkers(places);
     },
 
 
     /**
      * Called from the Places View Model, when a place is clicked
      * so that the respective marker is activated
-     * @param id - Array index for marker
+     * @param place - Place that was clicked in list (marker contained within)
      */
-    selectMarker: function (id) {
-        google.maps.event.trigger(this.markerList[id], 'click');
+    selectMarker: function (place) {
+        google.maps.event.trigger(place.marker, 'click');
     },
 
 
@@ -327,6 +288,29 @@ var gmapViewModel = {
     failedToLoadApi: function () {
         var mapElem = $('.container');
         mapElem.html('<h4>Oops, the Google Map API could not be loaded.  Please try again later.</h4>');
+    },
+
+
+    /**
+     * For the supplied list of places, set the
+     * map boundary to fit them correctly
+     * @param places
+     */
+    setBoundsToMarkers: function (places) {
+        var self = this;
+        var bounds = new google.maps.LatLngBounds();
+        places.forEach(function (place) {
+            bounds.extend(place.coord);
+        });
+        this.map.fitBounds(bounds);
+        /**
+         * Make map display responsively by using a window resize event and call
+         * fitBounds method to make sure map markers always fit on screen as
+         * user resizes their browser window
+         */
+        google.maps.event.addDomListener(window, 'resize', function () {
+            self.map.fitBounds(bounds);
+        });
     },
 
 
@@ -393,7 +377,7 @@ var placeListViewModel = {
 
     placesSearch: ko.observable(),
 
-    placesList: ko.observableArray([]),
+    visiblePlaceList: ko.observableArray([]),
 
     showSidebar: ko.observable(true),
 
@@ -407,16 +391,21 @@ var placeListViewModel = {
     },
 
 
+    /**
+     * User has clicked filter button
+     * Filter the available places and
+     * create a new list and set of markers
+     */
     filterPlaces: function () {
-        /**
-         * User has clicked filter button
-         * Filter the available places and
-         * create a new list and set of markers
-         */
         var searchText = this.placesSearch();
         var searchRE = new RegExp(searchText, 'i');
         var filteredPlaceList = model.places.filter(function (place) {
-            return place.name.search(searchRE) >= 0;
+            if (place.name.search(searchRE) >= 0) {
+                place.marker.setVisible(true);
+                return true;
+            }
+            place.marker.setVisible(false);
+            return false;
         });
         var newPlacesList = [];
         filteredPlaceList.forEach(function (place, index) {
@@ -424,8 +413,7 @@ var placeListViewModel = {
                 newPlacesList.push(place);
             }
         );
-        this.placesList(newPlacesList);
-        gmapViewModel.showMarkers(newPlacesList);
+        this.visiblePlaceList(newPlacesList);
     },
 
 
@@ -444,7 +432,7 @@ var placeListViewModel = {
             return 0;
         }).forEach(function (place, index) {
             place.id = index;
-            self.placesList.push(place);
+            self.visiblePlaceList.push(place);
         });
     },
 
@@ -456,7 +444,7 @@ var placeListViewModel = {
      * @param elem - Place DOM element that was clicked
      */
     listItemClick: function (elem) {
-        gmapViewModel.selectMarker(elem.id);
+        gmapViewModel.selectMarker(placeListViewModel.visiblePlaceList()[elem.id]);
     },
 
 
@@ -474,6 +462,14 @@ var placeListViewModel = {
          */
         this.placesSearch.subscribe(function () {
             self.filterPlaces();
+        });
+
+        /**
+         * Subscribe to place list change
+         * so that map bounds can be recalculated
+         */
+        this.visiblePlaceList.subscribe(function () {
+            gmapViewModel.setBoundsToMarkers(self.visiblePlaceList());
         });
 
     }

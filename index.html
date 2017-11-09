@@ -26,8 +26,9 @@
             <h4>Castles & Eateries</h4>
         </div>
         <div class="col-xs-3 ">
-            <a href="#" >
-                <span id="hamburger-icon" class="glyphicon glyphicon-menu-hamburger" data-bind="click:placeListViewModel.toggleSidebar"></span>
+            <a href="#">
+                <span id="hamburger-icon" class="glyphicon glyphicon-menu-hamburger"
+                      data-bind="click:placeListViewModel.toggleSidebar"></span>
             </a>
         </div>
     </header>
@@ -42,13 +43,14 @@
             </div>
             <div class="row">
                 <!-- List of places that can be clicked and filtered -->
-                <ul class="list-group" data-bind="foreach: placesList">
+                <ul class="list-group" data-bind="foreach: visiblePlaceList">
                     <li class="list-group-item" data-bind="text: name, click: placeListViewModel.listItemClick"></li>
                 </ul>
             </div>
         </sidebar>
 
-        <main class="col-xs-8 col-sm-10" data-bind="css: {'col-xs-12': !showSidebar(), 'col-xs-8 col-sm-10': showSidebar()}">
+        <main class="col-xs-8 col-sm-10"
+              data-bind="css: {'col-xs-12': !showSidebar(), 'col-xs-8 col-sm-10': showSidebar()}">
             <!-- Placeholder for the map -->
             <div id="map"></div>
         </main>
